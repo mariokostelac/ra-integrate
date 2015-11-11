@@ -5,6 +5,8 @@ DNA assembler developed on FER, Croatia
 - ruby
 - make
 - g++ (4.8.2 or later)
+- graphviz
+- and lot more. If it does not work for you, drop an issue...
 
 ## Installation
 ```
