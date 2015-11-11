@@ -1,0 +1,191 @@
+#!/usr/bin/env ruby
+require 'optparse'
+
+ProcessError = Class.new(StandardError)
+
+$start_time = Time.now
+
+module Colors
+  def self.black;          "\e[30m" end
+  def self.red;            "\e[31m" end
+  def self.green;          "\e[32m" end
+  def self.brown;          "\e[33m" end
+  def self.blue;           "\e[34m" end
+  def self.magenta;        "\e[35m" end
+  def self.cyan;           "\e[36m" end
+  def self.gray;           "\e[37m" end
+
+  def self.end;            "\e[0m" end
+end
+
+class Task
+
+  @@task_number = 1
+
+  def initialize(name, &block)
+    @name = name
+    @cmd = block
+  end
+
+  def run
+    puts Colors::green
+    puts "#{@@task_number}. #{@name}"
+    puts '=' * 80
+
+    puts Colors::cyan
+
+    before = Time.now
+    res = @cmd.call
+    after = Time.now
+
+    puts Colors::green
+    passed = human_time((after - before) * 1000)
+    puts "Finished in #{passed}"
+    puts '=' * 80
+
+    @@task_number += 1
+
+    res
+  end
+
+end
+
+def human_time(milisecs)
+  units = ['ms', 1000, 's', 60, 'm', 60]
+
+  parts = []
+
+  left = milisecs.to_i
+  i = 0
+
+  while i < units.size do
+    unit_label = units[i]
+    till_next = units[i + 1]
+
+    in_this_unit = left % till_next
+    left -= in_this_unit
+    left /= till_next
+
+    parts.push(unit_label)
+    parts.push(in_this_unit.to_s)
+
+    break if left == 0
+
+    i += 2
+  end
+
+  parts.push('h', left) if left > 0
+
+  parts.reverse.take(6).join('')
+end
+
+def help
+  puts $options_parser
+  exit 1
+end
+
+def parse_options!
+  OptionParser.new do |opts|
+    $options_parser = opts
+    opts.banner = "Usage: #{$0} <fasta_reads>"
+
+    opts.on("-d", "--directory dirpath", "Set given dirpath as working directory") do |dir|
+      working_dir = dir
+    end
+
+    opts.on_tail("-h", "--help", "Show this message") do
+      help
+    end
+
+  end.parse!
+end
+
+def parse_arguments
+  if ARGV.length < 1
+    help
+  end
+
+  ARGV.take 1
+end
+
+def ensure_dir(dirpath)
+  cmd = "mkdir -p #{dirpath}"
+  puts(cmd)
+  system(cmd)
+end
+
+def run_graphmap(reads_path)
+  overlaps_path = File.join(working_dir, 'overlaps.mhap')
+  cmd = "#{__dir__}/components/graphmap/bin/graphmap-not_release -w owler -B 0 -r #{reads_path} -d #{reads_path} -L mhap -o #{overlaps_path}"
+  puts(cmd)
+  if !system(cmd)
+    fail(ProcessError, 'Process exited with non-zero exit code')
+  end
+  overlaps_path
+end
+
+def run_layout(reads_path, overlaps_path)
+  cmd = "#{__dir__}/components/ra/bin/layout #{reads_path} #{overlaps_path}"
+  puts(cmd)
+  if !system(cmd)
+    fail(ProcessError, 'Process exited with non-zero exit code')
+  end
+end
+
+$options_parser = nil
+
+$options = {}
+
+def working_dir
+  if $options.has_key?(:working_dir)
+    return $options[:working_dir]
+  end
+
+  suffix = $start_time.strftime("%Y%m%d_%H%M%S")
+  working_dir = "assembly.#{suffix}"
+
+  working_dir
+end
+
+def working_dir=(str)
+  $options[:working_dir] = str
+end
+
+def main
+  parse_options!
+  reads_path,  = parse_arguments
+  overlaps_path = nil
+
+  puts Colors::green
+
+  Task.new "PREPARING ASSEMBLY DIRECTORY" do
+    if !ensure_dir(working_dir)
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "RUNNING GRAPHMAP" do
+    begin
+     overlaps_path = run_graphmap(reads_path)
+    rescue ProcessError
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "RUNNING LAYOUT" do
+    begin
+      run_layout(reads_path, overlaps_path)
+    rescue ProcessError
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  passed = human_time((Time.now - $start_time) * 1000)
+  puts "Assembly total time #{passed}"
+  puts '=' * 80
+end
+
+main()
