@@ -1,0 +1,6 @@
+[submodule "components/graphmap"]
+	path = components/graphmap
+	url = https://github.com/isovic/graphmap.git
+[submodule "components/ra"]
+	path = components/ra
+	url = https://github.com/mariokostelac/ra
