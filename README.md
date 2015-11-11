@@ -1,5 +1,5 @@
 # dnassembler
-DNA assembler developed on FER, Croatia
+DNA assembler developed on Faculty of Electrical Engineering and Computing and Ruder Boskovic Institute, Croatia
 
 ## Requirements
 - ruby
