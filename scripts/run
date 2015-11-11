@@ -120,7 +120,7 @@ end
 
 def run_graphmap(reads_path)
   overlaps_path = File.join(working_dir, 'overlaps.mhap')
-  binary = File.join(assembler_dir, 'components', 'graphmap', 'bin', 'graphmap-not_release')
+  binary = File.join(assembler_dir, 'components', 'graphmap', 'bin', 'Linux-x64', 'graphmap')
   cmd = "#{binary} -w owler -B 0 -r #{reads_path} -d #{reads_path} -L mhap -o #{overlaps_path}"
   puts(cmd)
   if !system(cmd)
