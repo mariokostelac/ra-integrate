@@ -14,6 +14,13 @@ git clone --recursive https://github.com/mariokostelac/dnassembler.git
 make
 ```
 
+## Upgrade
+```
+git pull
+git submodule foreach git pull origin master
+make
+```
+
 ## Clang Issues or "Build does not work!"
 If you are unlucky and your `g++` points to `clang`, run
 ```
