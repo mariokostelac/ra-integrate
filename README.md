@@ -49,3 +49,13 @@ If you are unlucky and your `g++` points to `clang`, run
 brew install g++-4.8  
 CXX=g++-4.8 make  
 ```  
+
+## Installation of Ruby 2.2 on Ubuntu  
+One can follow these instructions:
+```  
+https://www.brightbox.com/blog/2015/01/05/ruby-2-2-0-packages-for-ubuntu/  
+```  
+In this case, run Ra using:
+```  
+ruby2.2 scripts/run reads.fa  
+```
