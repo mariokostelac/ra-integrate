@@ -1,5 +1,5 @@
 # Ra
-Integration of the Ra assembler - a de novo DNA assembler for third generation sequencing data developed on Faculty of Electrical Engineering and Computing (FER), Ruder Boskovic Intitute (RBI) and Genome Institute of Singapore (GIS).   
+Integration of the Ra assembler - a de novo DNA assembler for third generation sequencing data developed on Faculty of Electrical Engineering and Computing (FER), Ruder Boskovic Institute (RBI) and Genome Institute of Singapore (GIS).   
 
 Ra is in development since 2014 in the form of several separate components that used to be run individually.  
 This project aims to ease the usage of Ra by integrating it into a complete de novo assembly tool.  
@@ -27,7 +27,7 @@ If you have any suggestions/issues, please don't refrain from filing a GitHub Is
 
 ## Installation  
 ```  
-git clone --recursive https://github.com/mariokostelac/dnassembler.git  
+git clone --recursive https://github.com/mariokostelac/ra-integrate.git  
 make  
 ```  
 
