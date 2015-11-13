@@ -19,7 +19,7 @@ If you have any suggestions/issues, please don't refrain from filing a GitHub Is
 
 
 ## Requirements  
-- ruby  
+- ruby 2.2  
 - make  
 - g++ (4.8 or later)  
 - graphviz  
