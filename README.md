@@ -13,7 +13,7 @@ Thorough testing is still required, but early results are promising:
 Example of work in progress:  
 - single 4.1Mbp contig **pacbio-only** E. Coli K-12 assembly (http://www.cbcb.umd.edu/software/PBcR/data/selfSampleData.tar.gz). The assembly produces a circular alignment, however, ```contigs_fast.fasta``` contains a large deletion (```docs/pacbio-contigs_fast.png```), probably caused by repeats. For this case, unitigs (```unitigs_fast.fasta```) might be a better choice until we resolve this issue. This is a work in progress, and we welcome any and all suggestions.  
 
-As of yet, Ra does not implement a consensus step, so the output ```contigs_fast.fasta``` has the error rate similar to the input reads. Consensus phase will be added at a later stage.  
+As of yet, Ra does not implement a consensus step, so the output ```contigs_fast.fasta``` has the error rate similar to the input reads. Consensus phase will be added at a later stage. Also, on larger datasets owler gets slower than on the datasets listed above. This is an issue currently being addressed.  
 
 If you have any suggestions/issues, please don't refrain from filing a GitHub Issue!
 
