@@ -90,7 +90,7 @@ def parse_options!
     opts.banner = "Usage: #{$0} <fasta_reads>"
 
     opts.on("-d", "--directory dirpath", "Set given dirpath as working directory") do |dir|
-      working_dir = dir
+      set_working_dir(dir)
     end
 
     opts.on_tail("-h", "--help", "Show this message") do
@@ -148,12 +148,10 @@ def working_dir
   end
 
   suffix = $start_time.strftime("%Y%m%d_%H%M%S")
-  working_dir = "assembly.#{suffix}"
-
-  working_dir
+  $options[:working_dir] = "assembly.#{suffix}"
 end
 
-def working_dir=(str)
+def set_working_dir(str)
   $options[:working_dir] = str
 end
 
