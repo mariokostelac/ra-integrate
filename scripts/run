@@ -15,7 +15,7 @@ module Colors
   def self.cyan;           "\e[36m" end
   def self.gray;           "\e[37m" end
 
-  def self.end;            "\e[0m" end
+  def self.reset;            "\e[0m" end
 end
 
 class Task
@@ -192,4 +192,11 @@ def main
   puts '=' * 80
 end
 
-main()
+begin
+  main()
+rescue
+  puts Colors::reset
+  raise
+ensure
+  puts Colors::reset
+end
