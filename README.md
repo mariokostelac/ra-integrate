@@ -26,6 +26,20 @@ If you have any suggestions/issues, please don't refrain from filing a GitHub Is
 - maybe some more. If it does not work for you, drop an issue...  
 
 ## Installation  
+### Easy way (in container)
+```
+docker pull mariokostelac/ra-integrate:master
+```
+will get you a container with all dependencies installed and precompiled `ra` assembler (with source code).
+
+After you get it, you can run a new container with
+```
+docker run -t -i -v ~/shared_dir:/data ra-integrate bash
+```
+where ~/shared_dir is shared directory between your OS and `ra` container, mount as `/data` in container.
+Ra itself is located in `/ra`.
+
+### Hard and dirty way (compiling + installing dependencies)
 ```  
 git clone --recursive https://github.com/mariokostelac/ra-integrate.git  
 make  
