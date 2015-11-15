@@ -93,6 +93,10 @@ def parse_options!
       set_working_dir(dir)
     end
 
+    opts.on("-x", "--overlaps overlaps_file", "Skip overlap phase and use overlaps from given file") do |file|
+      set_overlaps_path(file)
+    end
+
     opts.on_tail("-h", "--help", "Show this message") do
       help
     end
@@ -155,10 +159,14 @@ def set_working_dir(str)
   $options[:working_dir] = str
 end
 
+def set_overlaps_path(str)
+  $options[:overlaps_path] = str
+end
+
 def main
   parse_options!
   reads_path,  = parse_arguments
-  overlaps_path = nil
+  overlaps_path = $options[:overlaps_path]
 
   puts Colors::green
 
@@ -171,7 +179,11 @@ def main
 
   Task.new "RUNNING GRAPHMAP" do
     begin
-     overlaps_path = run_graphmap(reads_path)
+      if overlaps_path.nil?
+        overlaps_path = run_graphmap(reads_path)
+      else
+        puts "Skipping overlap phase, using overlaps from #{overlaps_path}!"
+      end
     rescue ProcessError
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
