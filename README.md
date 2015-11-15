@@ -33,9 +33,7 @@ make
 
 ## Upgrade  
 ```  
-git pull  
-git submodule foreach git pull origin master  
-make  
+make upgrade
 ```  
 
 ## Usage  
