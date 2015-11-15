@@ -36,8 +36,8 @@ After you get it, you can run a new container with
 ```
 docker run -t -i -v ~/shared_dir:/data ra-integrate bash
 ```
-where ~/shared_dir is shared directory between your OS and `ra` container, mount as `/data` in container.
-Ra itself is located in `/ra`.
+where `~/shared_dir` is shared directory between your OS and `ra` container, mounted as `/data` in container.
+`Ra` itself is located in `/ra`.
 
 ### Hard and dirty way (compiling + installing dependencies)
 ```  
