@@ -277,6 +277,12 @@ def set_overlaps_path(str)
   $options[:overlaps_path] = str
 end
 
+def dump_overlaps(depot_path, destination)
+  cmd = "#{depot_bin} -d #{depot_path} dump_overlaps 1> #{destination} 2> /dev/null"
+  puts(cmd)
+  system(cmd)
+end
+
 def main
   parse_options!
   reads_path,  = parse_arguments
@@ -316,6 +322,7 @@ def main
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end
+    dump_overlaps(depot_path, File.join(working_dir, 'overlaps.initial.radump'))
   end.run
 
   Task.new "CALCULATING READS COVERAGE" do
@@ -330,6 +337,7 @@ def main
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end
+    dump_overlaps(depot_path, File.join(working_dir, 'overlaps.no_contained.radump'))
   end.run
 
   Task.new "CREATING DOVETAIL OVERLAPS" do
@@ -337,6 +345,7 @@ def main
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end
+    dump_overlaps(depot_path, File.join(working_dir, 'overlaps.dovetail.radump'))
   end.run
 
   Task.new "FILTERING TRANSITIVE OVERLAPS" do
@@ -344,6 +353,7 @@ def main
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end
+    dump_overlaps(depot_path, File.join(working_dir, 'overlaps.no_transitive.radump'))
   end.run
 
   Task.new "FINDING UNITIGS" do
@@ -351,6 +361,7 @@ def main
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end
+    dump_overlaps(depot_path, File.join(working_dir, 'overlaps.after_unitigger.radump'))
   end.run
 
   Task.new "DRAWING GRAPHS" do
