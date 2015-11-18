@@ -122,6 +122,50 @@ def assembler_dir
   File.dirname(__dir__)
 end
 
+def settings_file
+  return $options[:settings_file]
+end
+
+def depot_path
+  File.join(working_dir, 'depot')
+end
+
+def ra_bin_dir(debug: false)
+  File.join(File.dirname(__dir__), 'components', 'ra', 'bin')
+end
+
+def filter_contained_bin(debug: false)
+  File.join(ra_bin_dir, "filter_contained")
+end
+
+def create_dovetail_bin(debug: false)
+  File.join(ra_bin_dir, "widen_overlaps")
+end
+
+def filter_transitives_bin(debug: false)
+  File.join(ra_bin_dir, "filter_transitive")
+end
+
+def unitigger_bin(debug: false)
+  File.join(ra_bin_dir, "unitigger")
+end
+
+def draw_graph_bin(debug: false)
+  File.join(ra_bin_dir, "overlap2dot")
+end
+
+def filter_bad_overlaps_bin(debug: false)
+  File.join(ra_bin_dir, "filter_erroneous_overlaps")
+end
+
+def fill_read_coverage_bin(debug: false)
+  File.join(ra_bin_dir, "fill_read_coverage")
+end
+
+def depot_bin(debug: false)
+  File.join(ra_bin_dir, "depot")
+end
+
 def run_graphmap(reads_path)
   overlaps_path = File.join(working_dir, 'overlaps.mhap')
   binary = File.join(assembler_dir, 'components', 'graphmap', 'bin', 'Linux-x64', 'graphmap')
@@ -133,12 +177,82 @@ def run_graphmap(reads_path)
   overlaps_path
 end
 
-def run_layout(reads_path, overlaps_path)
-  binary = File.join(assembler_dir, 'components', 'ra', 'bin', 'layout')
-  cmd = "#{binary} #{reads_path} #{overlaps_path}"
+def run_import_reads(reads_filename)
+  reads_format = determine_format(reads_filename)
+  reads_format_option = "-s #{reads_format}" unless reads_format.nil?
+  cmd = "#{depot_bin} #{reads_format_option} -r #{reads_filename} -d #{depot_path} import_reads"
   puts(cmd)
-  if !system(cmd)
-    fail(ProcessError, 'Process exited with non-zero exit code')
+  system(cmd)
+end
+
+def run_import_overlaps(overlaps_path)
+  overlaps_format = determine_format(overlaps_path)
+  overlaps_format_option = "-X #{overlaps_format}" unless overlaps_format.nil?
+  cmd = "#{depot_bin} #{overlaps_format_option} -x #{overlaps_path} -d #{depot_path} import_overlaps"
+  puts(cmd)
+  system(cmd)
+end
+
+def run_fill_read_coverage
+  cmd = "#{fill_read_coverage_bin} -d #{depot_path}"
+  puts(cmd)
+  system(cmd)
+end
+
+def run_filter_contained
+  cmd = "#{filter_contained_bin} -d #{depot_path}"
+  puts(cmd)
+  system(cmd)
+end
+
+def run_dovetail_overlaps
+  cmd = "#{create_dovetail_bin} -d #{depot_path}"
+  puts(cmd)
+  system(cmd)
+end
+
+def run_filer_transitive
+  cmd = "#{filter_transitives_bin} -d #{depot_path}"
+  puts(cmd)
+  system(cmd)
+end
+
+def run_unitigger
+  settings = "-b #{settings_file}" unless settings_file.nil?
+
+  cmd = "#{unitigger_bin} -d #{depot_path} -w #{working_dir} #{settings}"
+  puts(cmd)
+  system(cmd)
+end
+
+def run_graphviz(reads_path, overlaps_path)
+  reads_format = determine_format(reads_path)
+  reads_format_option = "-s #{reads_format}" unless reads_format.nil?
+  graph_filename = "#{working_dir}/genome.svg"
+
+  cmd = "#{draw_graph_bin} #{reads_format_option} -r #{reads_path} -x #{overlaps_path} | neato -T svg -o #{graph_filename}"
+  puts(cmd)
+  system(cmd)
+end
+
+def determine_format(filename)
+  case File.extname(filename)
+  when '.fasta'
+    return 'fasta'
+  when '.fa'
+    return 'fasta'
+  when '.fastq'
+    return 'fastq'
+  when '.fq'
+    return 'fastq'
+  when '.afg'
+    return 'afg'
+  when '.mhap'
+    return 'mhap'
+  when '.radump'
+    return 'radump'
+  else
+    return nil
   end
 end
 
@@ -190,10 +304,57 @@ def main
     end
   end.run
 
-  Task.new "RUNNING LAYOUT" do
-    begin
-      run_layout(reads_path, overlaps_path)
-    rescue ProcessError
+  Task.new "FILLING DEPOT WITH READS" do
+    if !run_import_reads(reads_path)
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "FILLING DEPOT WITH OVERLAPS" do
+    if !run_import_overlaps(overlaps_path)
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "CALCULATING READS COVERAGE" do
+    if !run_fill_read_coverage
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "FILTERING CONTAINED READS" do
+    if !run_filter_contained
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "CREATING DOVETAIL OVERLAPS" do
+    if !run_dovetail_overlaps
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "FILTERING TRANSITIVE OVERLAPS" do
+    if !run_filer_transitive
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "FINDING UNITIGS" do
+    if !run_unitigger
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "DRAWING GRAPHS" do
+    if !run_graphviz(reads_path, File.join(working_dir, 'simplified.afg'))
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end
