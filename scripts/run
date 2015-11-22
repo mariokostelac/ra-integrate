@@ -278,7 +278,7 @@ def set_overlaps_path(str)
 end
 
 def dump_overlaps(depot_path, destination)
-  cmd = "#{depot_bin} -d #{depot_path} dump_overlaps 1> #{destination} 2> /dev/null"
+  cmd = "bash -c '#{depot_bin} -d #{depot_path} dump_overlaps 1> #{destination} 2> /dev/null'"
   puts(cmd)
   system(cmd)
 end
