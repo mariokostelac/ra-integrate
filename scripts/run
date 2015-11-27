@@ -89,6 +89,10 @@ def parse_options!
     $options_parser = opts
     opts.banner = "Usage: #{$0} <fasta_reads>"
 
+    opts.on("-s", "--spec spec_file", "Set given spec file") do |spec_path|
+      set_spec_file_path(spec_path)
+    end
+
     opts.on("-d", "--directory dirpath", "Set given dirpath as working directory") do |dir|
       set_working_dir(dir)
     end
@@ -220,7 +224,7 @@ end
 def run_unitigger
   settings = "-b #{settings_file}" unless settings_file.nil?
 
-  cmd = "#{unitigger_bin} -d #{depot_path} -w #{working_dir} #{settings}"
+  cmd = "#{unitigger_bin} #{spec_option} -d #{depot_path} -w #{working_dir} #{settings}"
   puts(cmd)
   system(cmd)
 end
@@ -267,6 +271,19 @@ def working_dir
 
   suffix = $start_time.strftime("%Y%m%d_%H%M%S")
   $options[:working_dir] = "assembly.#{suffix}"
+end
+
+def spec_file_path
+  $options[:spec_file]
+end
+
+def set_spec_file_path(spec_path)
+  $options[:spec_file] = spec_path
+end
+
+def spec_option
+  return nil if spec_file_path.nil?
+  return "-s #{spec_file_path}"
 end
 
 def set_working_dir(str)
