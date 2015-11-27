@@ -154,12 +154,12 @@ def unitigger_bin(debug: false)
   File.join(ra_bin_dir, "unitigger")
 end
 
-def draw_graph_bin(debug: false)
-  File.join(ra_bin_dir, "overlap2dot")
+def filter_erroneous_overlaps_bin(debug: false)
+  File.join(ra_bin_dir, "filter_erroneous_overlaps")
 end
 
-def filter_bad_overlaps_bin(debug: false)
-  File.join(ra_bin_dir, "filter_erroneous_overlaps")
+def draw_graph_bin(debug: false)
+  File.join(ra_bin_dir, "overlap2dot")
 end
 
 def fill_read_coverage_bin(debug: false)
@@ -222,9 +222,13 @@ def run_filer_transitive
 end
 
 def run_unitigger
-  settings = "-b #{settings_file}" unless settings_file.nil?
+  cmd = "#{unitigger_bin} #{spec_option} -d #{depot_path} -w #{working_dir}"
+  puts(cmd)
+  system(cmd)
+end
 
-  cmd = "#{unitigger_bin} #{spec_option} -d #{depot_path} -w #{working_dir} #{settings}"
+def run_filter_erroneous_overlaps
+  cmd = "#{filter_erroneous_overlaps_bin} #{spec_option} -d #{depot_path} -w #{working_dir}"
   puts(cmd)
   system(cmd)
 end
@@ -363,6 +367,14 @@ def main
       exit 1
     end
     dump_overlaps(depot_path, File.join(working_dir, 'overlaps.dovetail.radump'))
+  end.run
+
+  Task.new "FILTERING ERRONEOUS OVERLAPS" do
+    if !run_filter_erroneous_overlaps
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+    dump_overlaps(depot_path, File.join(working_dir, 'overlaps.no_erroneous.radump'))
   end.run
 
   Task.new "FILTERING TRANSITIVE OVERLAPS" do
