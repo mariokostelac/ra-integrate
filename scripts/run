@@ -269,13 +269,19 @@ $options_parser = nil
 
 $options = {}
 
+def assembly_name
+  return $options[:assembly_name] if !$options[:assembly_name].nil?
+  suffix = $start_time.strftime("%Y%m%d_%H%M%S")
+  name = "assembly.#{suffix}"
+  $options[:assembly_name] = name
+end
+
 def working_dir
   if $options.has_key?(:working_dir)
     return $options[:working_dir]
   end
 
-  suffix = $start_time.strftime("%Y%m%d_%H%M%S")
-  $options[:working_dir] = "assembly.#{suffix}"
+  $options[:working_dir] = "tmp.#{assembly_name}"
 end
 
 def spec_file_path
@@ -303,6 +309,11 @@ def dump_overlaps(depot_path, destination)
   cmd = "bash -c '#{depot_bin} -d #{depot_path} dump_overlaps 1> #{destination} 2> /dev/null'"
   puts(cmd)
   system(cmd)
+end
+
+def pack_results(reads_path)
+  dst = "#{assembly_name}.tar.gz"
+  Results.pack(dst_path: dst, src_directory: working_dir, spec_file: spec_file_path, dataset: reads_path)
 end
 
 def main
@@ -395,7 +406,14 @@ def main
   end.run
 
   Task.new "DRAWING GRAPHS" do
-    if !run_graphviz(reads_path, File.join(working_dir, 'simplified.afg'))
+    if !run_graphviz(reads_path, File.join(working_dir, 'final.mhap'))
+      puts 'Process exited with non-zero exit status, stopping here!'
+      exit 1
+    end
+  end.run
+
+  Task.new "PACKING RESULTS" do
+    if !pack_results(reads_path)
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end

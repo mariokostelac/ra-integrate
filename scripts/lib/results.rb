@@ -7,12 +7,11 @@ class Results
     Results.new(**args).calculate.pack
   end
 
-  def initialize(dst_path:, src_directory:, spec_file:, dataset:, reads_path:)
+  def initialize(dst_path:, src_directory:, spec_file:, dataset:)
     @src_directory = src_directory
     @dst_path = dst_path
-    @spec_file = spec_file
+    @spec_file = spec_file.to_s
     @dataset = dataset
-    @reads_path = reads_path
 
     @data = { spec_file: spec_file, dataset: dataset }
     @included_files = []
@@ -25,7 +24,7 @@ class Results
     write_unitigs_info
     write_contigs_info
     include_drawed_assembly_files
-    include_reads_file
+    include_dataset_file
     include_spec_files
 
     @data[:included_files] = @included_files
@@ -76,13 +75,13 @@ class Results
     @included_files.push(genome_in_svg)
   end
 
-  def include_reads_file
-    if (!File.file?(@reads_path))
-      fail(StandardError, "File '#{@reads_path}' does not exist")
+  def include_dataset_file
+    if (!File.file?(@dataset))
+      fail(StandardError, "File '#{@dataset}' does not exist")
       return
     end
 
-    @included_files.push(@reads_path)
+    @included_files.push(@dataset)
   end
 
   def write_date
