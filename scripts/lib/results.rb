@@ -29,6 +29,8 @@ class Results
 
     @data[:included_files] = @included_files
 
+    write_data
+
     self
   end
 
@@ -49,6 +51,16 @@ class Results
   end
 
   private
+  def write_data
+    results_path = File.join(@src_directory, 'results.json')
+
+    @data[:included_files].push(results_path)
+
+    f = File.new(results_path, 'w')
+    f.write(@data.to_json)
+    f.close
+  end
+
   def include_spec_files
     @included_files.push(@spec_file) if File.file?(@spec_file)
 
