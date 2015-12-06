@@ -1,10 +1,20 @@
-require 'optparse'
 require 'json'
+require 'optparse'
 
 class Results
 
   def self.pack(**args)
     Results.new(**args).calculate.pack
+  end
+
+  def self.calculate(**args)
+    Results.new(**args).calculate
+  end
+
+  def self.get_results_data(path:)
+    fail(StandardError, "'#{path}' is not a directory") if !File.directory?(path)
+
+    return get_results_data_from_dir(directory: path)
   end
 
   def initialize(dst_path:, src_directory:, spec_file:, dataset:)
@@ -51,6 +61,13 @@ class Results
   end
 
   private
+  def self.get_results_data_from_dir(directory:)
+    results_path = File.join(directory, 'results.json')
+    fail(StandardError, "File '#{results_path}' does not exist") if !File.file?(results_path)
+
+    return JSON.parse(File.read(results_path))
+  end
+
   def write_data
     results_path = File.join(@src_directory, 'results.json')
 

@@ -311,9 +311,9 @@ def dump_overlaps(depot_path, destination)
   system(cmd)
 end
 
-def pack_results(reads_path)
+def create_results_report(reads_path)
   dst = "#{assembly_name}.tar.gz"
-  Results.pack(dst_path: dst, src_directory: working_dir, spec_file: spec_file_path, dataset: reads_path)
+  Results.calculate(dst_path: dst, src_directory: working_dir, spec_file: spec_file_path, dataset: reads_path)
 end
 
 def main
@@ -412,8 +412,8 @@ def main
     end
   end.run
 
-  Task.new "PACKING RESULTS" do
-    if !pack_results(reads_path)
+  Task.new "CREATING RESULTS REPORT" do
+    if !create_results_report(reads_path)
       puts 'Process exited with non-zero exit status, stopping here!'
       exit 1
     end
