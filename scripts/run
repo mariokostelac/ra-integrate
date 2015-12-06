@@ -313,7 +313,8 @@ end
 
 def create_results_report(reads_path)
   dst = "#{assembly_name}.tar.gz"
-  Results.calculate(dst_path: dst, src_directory: working_dir, spec_file: spec_file_path, dataset: reads_path)
+  spec_file = File.expand_path(spec_file_path) if !spec_file_path.nil?
+  Results.calculate(dst_path: dst, src_directory: working_dir, spec_file: spec_file, dataset: File.expand_path(reads_path))
 end
 
 def main
