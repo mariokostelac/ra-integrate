@@ -17,13 +17,14 @@ class Results
     return get_results_data_from_dir(directory: path)
   end
 
-  def initialize(dst_path:, src_directory:, spec_file:, dataset:)
+  def initialize(dst_path:, src_directory:, spec_file:, dataset:, time:)
     @src_directory = src_directory
     @dst_path = dst_path
     @spec_file = spec_file.to_s
+    @time = time
     @dataset = dataset
 
-    @data = { spec_file: spec_file, dataset: dataset }
+    @data = { spec_file: spec_file, dataset: dataset, time: time }
     @included_files = []
   end
 
