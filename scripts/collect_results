@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+require 'json'
+
+all_results = []
+all_columns = []
+
+ARGV.each do |filename|
+  results = JSON.parse(File.open(filename).read)
+  results.each do |key, _|
+    all_columns.push(key) if !all_columns.include?(key)
+  end
+  all_results.push(results)
+end
+
+columns = ['commit_sha1', 'dataset', 'spec_file']
+all_columns.each do |c|
+  columns.push(c) if !columns.include?(c)
+end
+
+# print header
+puts columns.join(';')
+
+# print rows
+all_results.each do |result|
+  row = []
+  columns.each do |c|
+    row.push(result[c])
+  end
+  puts row.join(';')
+end
